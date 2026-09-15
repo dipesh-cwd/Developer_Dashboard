@@ -1,12 +1,34 @@
-import React from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router'
+
+import DashboardLayout from './layouts/DashboardLayout'
+
+import Dashboard from './pages/Dashboard'
+import Projects from './pages/Projects'
+import Tasks from './pages/Tasks'
+import Settings from './pages/Settings'
 
 const App = () => {
   return (
-    <div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<DashboardLayout />}>
+          <Route
+            path="/"
+            element={<Navigate to="/dashboard" replace />}
+          />
 
-      <p className="font-bold">hahahhahah</p>
-      
-    </div>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
