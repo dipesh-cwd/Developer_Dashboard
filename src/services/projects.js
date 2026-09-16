@@ -1,20 +1,11 @@
-const projects = [
-  {
-    id: 1,
-    name: 'Developer Dashboard',
-    description: 'React + Tailwind developer workspace',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'LifeOS',
-    description: 'MERN productivity application',
-    status: 'planned',
-  },
-]
+const API_URL = 'http://localhost:5000/api'
 
 export const getProjects = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  const response = await fetch(`${API_URL}/projects`)
 
-  return projects
+  if (!response.ok) {
+    throw new Error('Failed to fetch projects')
+  }
+
+  return response.json()
 }
