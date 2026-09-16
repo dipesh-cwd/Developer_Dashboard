@@ -1,4 +1,5 @@
 const express = require('express')
+const authenticate = require('../middleware/auth.middleware')
 
 const {
   getProjects,
@@ -9,12 +10,13 @@ const {
 
 const router = express.Router()
 
-router.get('/', getProjects)
+router.get('/', authenticate, getProjects)
 
-router.post('/', createProject)
+router.post('/', authenticate, createProject)
 
-router.patch('/:id', updateProject)
+router.patch('/:id', authenticate, updateProject)
 
-router.delete('/:id', deleteProject)
+router.delete('/:id', authenticate, deleteProject)
+
 
 module.exports = router

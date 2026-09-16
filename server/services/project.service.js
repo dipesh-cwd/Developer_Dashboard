@@ -1,16 +1,24 @@
 const Project = require('../models/Project')
 
-const getAllProjects = async () => {
-  return Project.find().sort({ createdAt: -1 })
+const getAllProjects = async (userId) => {
+  return Project.find({
+    owner: userId,
+  }).sort({ createdAt: -1 })
 }
 
-const createProject = async (projectData) => {
-  return Project.create(projectData)
+const createProject = async (projectData, userId) => {
+  return Project.create({
+    ...projectData,
+    owner: userId,
+  })
 }
 
-const updateProject = async (id, projectData) => {
-  return Project.findByIdAndUpdate(
-    id,
+const updateProject = async (id, projectData, userId) => {
+  return Project.findOneAndUpdate(
+    {
+      _id: id,
+      owner: userId,
+    },
     projectData,
     {
       new: true,
@@ -19,8 +27,11 @@ const updateProject = async (id, projectData) => {
   )
 }
 
-const deleteProject = async (id) => {
-  return Project.findByIdAndDelete(id)
+const deleteProject = async (id, userId) => {
+  return Project.findOneAndDelete({
+    _id: id,
+    owner: userId,
+  })
 }
 
 module.exports = {

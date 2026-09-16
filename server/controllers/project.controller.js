@@ -3,8 +3,9 @@ const projectService = require('../services/project.service')
 
 const getProjects = async (req, res) => {
   try {
-    const projects = await projectService.getAllProjects()
-
+const projects = await projectService.getAllProjects(
+  req.user.id
+)
     res.json(projects)
   } catch (error) {
     console.error(error)
@@ -17,7 +18,10 @@ const getProjects = async (req, res) => {
 
 const createProject = async (req, res) => {
   try {
-    const project = await projectService.createProject(req.body)
+const project = await projectService.createProject(
+  req.body,
+  req.user.id
+)
 
     res.status(201).json(project)
   } catch (error) {
@@ -39,7 +43,8 @@ const updateProject = async (req, res) => {
 
     const project = await projectService.updateProject(
       req.params.id,
-      req.body
+      req.body,
+      req.user.id
     )
 
     if (!project) {
@@ -67,7 +72,8 @@ const deleteProject = async (req, res) => {
     }
 
     const project = await projectService.deleteProject(
-      req.params.id
+      req.params.id,
+      req.user.id
     )
 
     if (!project) {

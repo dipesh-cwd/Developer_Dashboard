@@ -10,14 +10,19 @@ const projectSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      default: '',
       trim: true,
     },
 
     status: {
       type: String,
-      enum: ['active', 'planned', 'completed'],
+      enum: ['planned', 'active', 'completed'],
       default: 'planned',
+    },
+
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
   },
   {
