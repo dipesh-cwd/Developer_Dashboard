@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import PageHeader from '../components/ui/PageHeader'
 import {
   createProject,
+  deleteProject,
   getProjects,
 } from '../services/projects'
 
@@ -21,6 +22,16 @@ const Projects = () => {
     queryKey: ['projects'],
     queryFn: getProjects,
   })
+
+  const deleteProjectMutation = useMutation({
+  mutationFn: deleteProject,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['projects'],
+    })
+  },
+})
 
   const createProjectMutation = useMutation({
     mutationFn: createProject,
@@ -115,6 +126,13 @@ const Projects = () => {
             <span className="mt-4 inline-block rounded-full bg-slate-100 px-3 py-1 text-sm">
               {project.status}
             </span>
+            <button
+  onClick={() => deleteProjectMutation.mutate(project._id)}
+  disabled={deleteProjectMutation.isPending}
+  className="mt-4 rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+>
+  Delete
+</button>
           </div>
         ))}
       </div>

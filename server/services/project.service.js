@@ -5,12 +5,27 @@ const getAllProjects = async () => {
 }
 
 const createProject = async (projectData) => {
-  const project = await Project.create(projectData)
+  return Project.create(projectData)
+}
 
-  return project
+const updateProject = async (id, projectData) => {
+  return Project.findByIdAndUpdate(
+    id,
+    projectData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+}
+
+const deleteProject = async (id) => {
+  return Project.findByIdAndDelete(id)
 }
 
 module.exports = {
   getAllProjects,
   createProject,
+  updateProject,
+  deleteProject,
 }
