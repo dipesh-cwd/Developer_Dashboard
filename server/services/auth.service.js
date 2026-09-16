@@ -1,5 +1,10 @@
 const bcrypt = require('bcryptjs')
 const User = require('../models/User')
+const {
+  createAccessToken,
+  createRefreshToken,
+} = require('../utils/tokens')
+
 
 const registerUser = async ({ name, email, password }) => {
   const normalizedEmail = email.toLowerCase().trim()
@@ -53,10 +58,17 @@ const loginUser = async ({ email, password }) => {
     throw error
   }
 
+  const accessToken = createAccessToken(user._id)
+  const refreshToken = createRefreshToken(user._id)
+
   return {
-    id: user._id,
-    name: user.name,
-    email: user.email,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+    accessToken,
+    refreshToken,
   }
 }
 
