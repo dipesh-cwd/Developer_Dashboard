@@ -1,7 +1,7 @@
-const projects = require('../data/projects')
+const Project = require('../models/Project')
 
-const getAllProjects = () => {
-  return projects
+const getAllProjects = async () => {
+  return Project.find().sort({ createdAt: -1 })
 }
 
 module.exports = {
