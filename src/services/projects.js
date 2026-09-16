@@ -9,3 +9,19 @@ export const getProjects = async () => {
 
   return response.json()
 }
+
+export const createProject = async (projectData) => {
+  const response = await fetch(`${API_URL}/projects`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to create project')
+  }
+
+  return response.json()
+}
