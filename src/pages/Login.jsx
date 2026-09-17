@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
+
 const Login = () => {
   const navigate = useNavigate()
   const { login, loading } = useAuth()
@@ -10,6 +11,7 @@ const Login = () => {
     email: '',
     password: '',
   })
+  
 
   const [error, setError] = useState('')
 

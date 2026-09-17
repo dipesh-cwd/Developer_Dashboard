@@ -1,53 +1,46 @@
-import {
-  createContext,
-  useContext,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from "react";
 
-import api from '../lib/api'
+import api, { setupInterceptors } from "../lib/api";
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [accessToken, setAccessToken] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setupInterceptors(() => accessToken);
+  }, [accessToken]);
 
   const login = async (email, password) => {
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post("/auth/login", {
         email,
         password,
-      })
+      });
 
-      const {
-        user,
-        accessToken,
-        refreshToken,
-      } = response.data
+      const { user: userData, accessToken, refreshToken } = response.data.user;
 
-      setUser(user)
-      setAccessToken(accessToken)
+      setUser(userData);
+      setAccessToken(accessToken);
 
-      localStorage.setItem(
-        'refreshToken',
-        refreshToken
-      )
+      localStorage.setItem("refreshToken", refreshToken);
 
-      return response.data
+      return response.data;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const logout = () => {
-    setUser(null)
-    setAccessToken(null)
+    setUser(null);
+    setAccessToken(null);
 
-    localStorage.removeItem('refreshToken')
-  }
+    localStorage.removeItem("refreshToken");
+  };
 
   return (
     <AuthContext.Provider
@@ -61,9 +54,9 @@ export const AuthProvider = ({ children }) => {
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = () => {
-  return useContext(AuthContext)
-}
+  return useContext(AuthContext);
+};
