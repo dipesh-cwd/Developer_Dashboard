@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import api, { setupInterceptors } from "../lib/api";
+import api, {setAccessTokenGetter } from "../lib/api";
 
 const AuthContext = createContext(null);
 
@@ -9,9 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setupInterceptors(() => accessToken);
-  }, [accessToken]);
+useEffect(() => {
+  setAccessTokenGetter(() => accessToken);
+}, [accessToken]);
 
   const login = async (email, password) => {
     setLoading(true);
@@ -22,9 +22,9 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const { user: userData, accessToken, refreshToken } = response.data.user;
+      const { user, accessToken, refreshToken } = response.data
 
-      setUser(userData);
+      setUser(user);
       setAccessToken(accessToken);
 
       localStorage.setItem("refreshToken", refreshToken);

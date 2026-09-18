@@ -23,11 +23,9 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const user = await authService.loginUser(req.body)
+    const result = await authService.loginUser(req.body)
 
-    res.json({
-      user,
-    })
+    res.json(result)
   } catch (error) {
     console.error(error)
 
