@@ -15,6 +15,7 @@ router.get('/', authenticate, getProjects)
 router.post('/', authenticate, createProject)
 
 router.patch('/:id', authenticate, updateProject)
+router.put('/:id', authenticate, updateProject)
 
 router.delete('/:id', authenticate, deleteProject)
 
