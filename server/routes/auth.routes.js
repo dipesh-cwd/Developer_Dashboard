@@ -2,7 +2,7 @@ const express = require('express')
 
 const {
   register,
-
+me,
   login,
   refresh,
 } = require('../controllers/auth.controller')
@@ -15,11 +15,6 @@ router.post('/register', register)
 
 router.post('/login', login)
 router.post('/refresh', refresh)
-router.get('/me', authenticate, (req, res) => {
-  res.json({
-    message: 'You are authenticated',
-    user: req.user,
-  })
-})
+router.get('/me', authenticate, me)
 
 module.exports = router
