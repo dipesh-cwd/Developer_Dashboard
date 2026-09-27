@@ -12,6 +12,7 @@ import {
   deleteProject,
   getProjects,
   updateProject,
+  getGithubRepository,
 } from '../services/projectService'
 import { getTasks } from '../services/taskService'
 
@@ -19,6 +20,114 @@ const emptyForm = {
   name: '',
   description: '',
   status: 'planned',
+  githubUrl: '',
+}
+
+const GithubRepositoryPreview = ({ project }) => {
+  const { data, isPending, isError, error, refetch } = useQuery({
+    queryKey: ['github-repository', project._id],
+    queryFn: () => getGithubRepository(project._id),
+    enabled: Boolean(project.githubUrl),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (!project.githubUrl) {
+    return (
+      <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+        No GitHub repository connected.
+      </div>
+    )
+  }
+
+  if (isPending) {
+    return (
+      <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+        Loading GitHub data...
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
+        <p className="text-xs text-red-700">
+          {error?.response?.data?.message || 'Unable to load GitHub data.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-2 text-xs font-medium text-red-800 underline"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <a
+          href={data.htmlUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="truncate text-sm font-semibold hover:underline"
+        >
+          {data.fullName}
+        </a>
+        <span className="shrink-0 text-xs text-slate-500">
+          {data.defaultBranch}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+        <div className="rounded-md bg-white p-2">
+          <p className="font-semibold">{data.stars}</p>
+          <p className="text-slate-500">Stars</p>
+        </div>
+        <div className="rounded-md bg-white p-2">
+          <p className="font-semibold">{data.forks}</p>
+          <p className="text-slate-500">Forks</p>
+        </div>
+        <div className="rounded-md bg-white p-2">
+          <p className="font-semibold">{data.openIssues}</p>
+          <p className="text-slate-500">Issues</p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+        <span>{data.language || 'No language detected'}</span>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="font-medium text-slate-700 hover:text-slate-950"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {data.recentCommits?.length > 0 && (
+        <div className="mt-3 border-t border-slate-200 pt-3">
+          <p className="mb-2 text-xs font-semibold text-slate-700">
+            Recent commits
+          </p>
+          <div className="space-y-2">
+            {data.recentCommits.slice(0, 3).map((commit) => (
+              <a
+                key={commit.sha}
+                href={commit.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block truncate text-xs text-slate-600 hover:text-slate-950 hover:underline"
+              >
+                {commit.message}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 const Projects = () => {
@@ -75,6 +184,7 @@ const Projects = () => {
       name: form.name.trim(),
       description: form.description.trim(),
       status: form.status,
+      githubUrl: form.githubUrl.trim(),
     }
 
     if (editingId) {
@@ -90,6 +200,7 @@ const Projects = () => {
       name: project.name,
       description: project.description || '',
       status: project.status,
+      githubUrl: project.githubUrl || '',
     })
   }
 
@@ -162,6 +273,16 @@ const Projects = () => {
             <option value="active">Active</option>
             <option value="completed">Completed</option>
           </select>
+
+          <input
+            value={form.githubUrl}
+            onChange={(event) =>
+              setForm({ ...form, githubUrl: event.target.value })
+            }
+            placeholder="GitHub repository URL (optional)"
+            type="url"
+            className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500 md:col-span-2"
+          />
 
           <textarea
             value={form.description}
@@ -254,6 +375,8 @@ const Projects = () => {
                     Open workspace →
                   </Link>
                 </div>
+
+                <GithubRepositoryPreview project={project} />
 
                 <div className="mt-4 flex gap-2">
                   <button

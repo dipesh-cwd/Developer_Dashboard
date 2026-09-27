@@ -6,6 +6,7 @@ const {
   createProject,
   updateProject,
   deleteProject,
+  getGithubRepository,
 } = require('../controllers/project.controller')
 
 const router = express.Router()
@@ -16,6 +17,8 @@ router.post('/', authenticate, createProject)
 
 router.patch('/:id', authenticate, updateProject)
 router.put('/:id', authenticate, updateProject)
+
+router.get('/:id/github', authenticate, getGithubRepository)
 
 router.delete('/:id', authenticate, deleteProject)
 

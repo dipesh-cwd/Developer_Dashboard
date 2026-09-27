@@ -19,6 +19,12 @@ const projectSchema = new mongoose.Schema(
       default: 'planned',
     },
 
+    githubUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

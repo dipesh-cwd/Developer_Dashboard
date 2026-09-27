@@ -18,3 +18,8 @@ export const updateProject = async (id, projectData) => {
 export const deleteProject = async (id) => {
   await api.delete(`/projects/${id}`)
 }
+
+export const getGithubRepository = async (id) => {
+  const response = await api.get(`/projects/${id}/github`)
+  return response.data
+}

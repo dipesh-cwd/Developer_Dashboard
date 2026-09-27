@@ -6,6 +6,7 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
     name: project?.name || "",
     description: project?.description || "",
     status: project?.status || "planned",
+    githubUrl: project?.githubUrl || "",
   });
   
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
       name: project?.name || "",
       description: project?.description || "",
       status: project?.status || "planned",
+      githubUrl: project?.githubUrl || "",
     });
   }, [project]);
 
@@ -45,6 +47,7 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
           name: form.name.trim(),
           description: form.description.trim(),
           status: form.status,
+          githubUrl: form.githubUrl.trim(),
         });
 
         onUpdated?.(updatedProject);
@@ -53,6 +56,7 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
           name: form.name.trim(),
           description: form.description.trim(),
           status: form.status,
+          githubUrl: form.githubUrl.trim(),
         });
 
         onCreated?.(newProject);
@@ -61,6 +65,7 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
           name: "",
           description: "",
           status: "planned",
+          githubUrl: "",
         });
       }
     } catch (error) {
@@ -103,6 +108,19 @@ const ProjectForm = ({ project, onCreated, onUpdated, onCancel }) => {
             value={form.name}
             onChange={handleChange}
             placeholder="e.g. Developer Dashboard"
+            className="w-full rounded-lg border px-3 py-2 outline-none focus:border-slate-500"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">GitHub repository</label>
+
+          <input
+            type="url"
+            name="githubUrl"
+            value={form.githubUrl}
+            onChange={handleChange}
+            placeholder="https://github.com/owner/repository"
             className="w-full rounded-lg border px-3 py-2 outline-none focus:border-slate-500"
           />
         </div>

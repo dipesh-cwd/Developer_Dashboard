@@ -7,6 +7,13 @@ const getAllProjects = async (userId) => {
   }).sort({ createdAt: -1 })
 }
 
+const getProjectById = async (id, userId) => {
+  return Project.findOne({
+    _id: id,
+    owner: userId,
+  })
+}
+
 const createProject = async (projectData, userId) => {
   return Project.create({
     ...projectData,
@@ -49,4 +56,5 @@ module.exports = {
   createProject,
   updateProject,
   deleteProject,
+  getProjectById,
 }
