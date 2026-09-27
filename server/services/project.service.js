@@ -29,7 +29,7 @@ const updateProject = async (id, projectData, userId) => {
     },
     projectData,
     {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }
   )

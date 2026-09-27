@@ -3,6 +3,7 @@ const authenticate = require('../middleware/auth.middleware')
 
 const {
   getProjects,
+  getProject,
   createProject,
   updateProject,
   deleteProject,
@@ -12,6 +13,7 @@ const {
 const router = express.Router()
 
 router.get('/', authenticate, getProjects)
+router.get('/:id', authenticate, getProject)
 
 router.post('/', authenticate, createProject)
 

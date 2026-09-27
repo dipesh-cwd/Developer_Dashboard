@@ -65,7 +65,7 @@ const updateTask = async (id, taskData, userId) => {
     },
     data,
     {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     }
   ).populate('project', 'name status')

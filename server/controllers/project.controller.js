@@ -17,6 +17,35 @@ const projects = await projectService.getAllProjects(
   }
 }
 
+const getProject = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: 'Invalid project ID',
+      })
+    }
+
+    const project = await projectService.getProjectById(
+      req.params.id,
+      req.user.id
+    )
+
+    if (!project) {
+      return res.status(404).json({
+        message: 'Project not found',
+      })
+    }
+
+    res.json(project)
+  } catch (error) {
+    console.error(error)
+
+    res.status(500).json({
+      message: 'Failed to fetch project',
+    })
+  }
+}
+
 const createProject = async (req, res) => {
   try {
 const project = await projectService.createProject(
@@ -132,6 +161,7 @@ const deleteProject = async (req, res) => {
 
 module.exports = {
   getProjects,
+  getProject,
   createProject,
   updateProject,
   deleteProject,

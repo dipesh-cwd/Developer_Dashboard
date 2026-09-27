@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+
 const ProjectCard = ({
   project,
   onEdit,
@@ -14,14 +16,10 @@ const ProjectCard = ({
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-lg font-semibold">
-          {project.name}
-        </h3>
-
+        <h3 className="text-lg font-semibold">{project.name}</h3>
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${
-            statusStyles[project.status] ||
-            'bg-slate-100 text-slate-700'
+            statusStyles[project.status] || 'bg-slate-100 text-slate-700'
           }`}
         >
           {project.status}
@@ -33,28 +31,36 @@ const ProjectCard = ({
       </p>
 
       <p className="mt-5 text-xs text-slate-400">
-        Created:{' '}
-        {new Date(project.createdAt).toLocaleDateString()}
+        Created: {new Date(project.createdAt).toLocaleDateString()}
       </p>
 
-      {!readOnly && (
-      <div className="mt-4 flex gap-2">
-        <button
-          onClick={() => onEdit(project)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          to={`/projects/${project._id}`}
+          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
         >
-          Edit
-        </button>
+          Open
+        </Link>
 
-        <button
-          onClick={() => onDelete(project._id)}
-          disabled={isDeleting}
-          className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-        >
-          {isDeleting ? 'Deleting...' : 'Delete'}
-        </button>
+        {!readOnly && (
+          <>
+            <button
+              onClick={() => onEdit(project)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={() => onDelete(project._id)}
+              disabled={isDeleting}
+              className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
+          </>
+        )}
       </div>
-      )}
     </div>
   )
 }

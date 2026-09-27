@@ -106,7 +106,7 @@ const updateProfile = async (userId, { name, email }) => {
   const user = await User.findByIdAndUpdate(
     userId,
     updates,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).select('name email')
 
   if (!user) {

@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Projects from './pages/Projects'
+import ProjectDetails from './pages/ProjectDetails'
 import Register from './pages/Register'
 import Settings from './pages/Settings'
 import Tasks from './pages/Tasks'
@@ -30,6 +31,7 @@ const App = () => {
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:id" element={<ProjectDetails />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
