@@ -39,10 +39,14 @@ const getRepository = async (githubUrl) => {
     'User-Agent': 'Developer-Dashboard',
   }
 
-  const repoResponse = await fetch(
-    `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}`,
-    { headers }
-  )
+  const baseUrl = `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}`
+
+  const [repoResponse, commitsResponse, issuesResponse, pullsResponse] = await Promise.all([
+    fetch(baseUrl, { headers }),
+    fetch(`${baseUrl}/commits?per_page=5`, { headers }),
+    fetch(`${baseUrl}/issues?state=open&per_page=5`, { headers }),
+    fetch(`${baseUrl}/pulls?state=open&per_page=5`, { headers }),
+  ])
 
   if (!repoResponse.ok) {
     const error = new Error(
@@ -56,13 +60,7 @@ const getRepository = async (githubUrl) => {
 
   const repository = await repoResponse.json()
 
-  const commitsResponse = await fetch(
-    `https://api.github.com/repos/${encodeURIComponent(parsed.owner)}/${encodeURIComponent(parsed.repo)}/commits?per_page=5`,
-    { headers }
-  )
-
   let recentCommits = []
-
   if (commitsResponse.ok) {
     const commits = await commitsResponse.json()
     recentCommits = commits.map((commit) => ({
@@ -71,6 +69,38 @@ const getRepository = async (githubUrl) => {
       author: commit.commit?.author?.name || commit.author?.login || 'Unknown',
       date: commit.commit?.author?.date || null,
       url: commit.html_url,
+    }))
+  }
+
+  let recentIssues = []
+  if (issuesResponse.ok) {
+    const issues = await issuesResponse.json()
+    recentIssues = issues
+      .filter((issue) => !issue.pull_request)
+      .slice(0, 5)
+      .map((issue) => ({
+        number: issue.number,
+        title: issue.title,
+        state: issue.state,
+        url: issue.html_url,
+        createdAt: issue.created_at,
+        updatedAt: issue.updated_at,
+        comments: issue.comments,
+      }))
+  }
+
+  let recentPullRequests = []
+  if (pullsResponse.ok) {
+    const pullRequests = await pullsResponse.json()
+    recentPullRequests = pullRequests.map((pullRequest) => ({
+      number: pullRequest.number,
+      title: pullRequest.title,
+      state: pullRequest.state,
+      draft: Boolean(pullRequest.draft),
+      url: pullRequest.html_url,
+      createdAt: pullRequest.created_at,
+      updatedAt: pullRequest.updated_at,
+      author: pullRequest.user?.login || 'Unknown',
     }))
   }
 
@@ -87,6 +117,8 @@ const getRepository = async (githubUrl) => {
     visibility: repository.visibility,
     updatedAt: repository.updated_at,
     recentCommits,
+    recentIssues,
+    recentPullRequests,
   }
 }
 
