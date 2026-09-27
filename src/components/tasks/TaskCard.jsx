@@ -15,6 +15,8 @@ const TaskCard = ({
   onEdit,
   onDelete,
   isDeleting,
+  onStatusChange,
+  isUpdating = false,
   readOnly = false,
 }) => {
   return (
@@ -43,14 +45,26 @@ const TaskCard = ({
         </span>
 
         {task.dueDate && (
-          <span className="text-slate-400">
-            Due {new Date(task.dueDate).toLocaleDateString()}
+          <span className={`text-slate-400 ${new Date(task.dueDate) < new Date() && task.status !== 'done' ? 'font-semibold text-red-600' : ''}`}>
+            {new Date(task.dueDate) < new Date() && task.status !== 'done' ? 'Overdue · ' : 'Due · '}
+            {new Date(task.dueDate).toLocaleDateString()}
           </span>
         )}
       </div>
 
       {!readOnly && (
-      <div className="mt-5 flex gap-2">
+      <div className="mt-5 flex flex-wrap gap-2">
+        {onStatusChange && (
+          <button
+            type="button"
+            onClick={() => onStatusChange(task._id, task.status === 'todo' ? 'in-progress' : task.status === 'in-progress' ? 'done' : 'todo')}
+            disabled={isUpdating}
+            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isUpdating ? 'Updating...' : task.status === 'todo' ? 'Start' : task.status === 'in-progress' ? 'Complete' : 'Reopen'}
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => onEdit(task)}
