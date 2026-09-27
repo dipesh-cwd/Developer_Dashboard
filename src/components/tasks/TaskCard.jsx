@@ -39,6 +39,12 @@ const TaskCard = ({
         {task.description || 'No description'}
       </p>
 
+      {task.project?.name && (
+        <span className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+          {task.project.name}
+        </span>
+      )}
+
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
         <span className={`font-semibold ${priorityStyles[task.priority]}`}>
           {task.priority} priority

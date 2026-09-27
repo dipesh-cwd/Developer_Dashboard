@@ -31,6 +31,12 @@ const taskSchema = new mongoose.Schema(
       type: Date,
     },
 
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      index: true,
+    },
+
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

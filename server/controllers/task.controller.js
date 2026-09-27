@@ -3,7 +3,10 @@ const taskService = require('../services/task.service')
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await taskService.getAllTasks(req.user.id)
+    const tasks = await taskService.getAllTasks(
+      req.user.id,
+      req.query.projectId
+    )
     res.json(tasks)
   } catch (error) {
     console.error(error)
@@ -19,8 +22,8 @@ const createTask = async (req, res) => {
     res.status(201).json(task)
   } catch (error) {
     console.error(error)
-    res.status(400).json({
-      message: 'Failed to create task',
+    res.status(error.statusCode || 400).json({
+      message: error.message || 'Failed to create task',
     })
   }
 }
@@ -48,8 +51,8 @@ const updateTask = async (req, res) => {
     res.json(task)
   } catch (error) {
     console.error(error)
-    res.status(400).json({
-      message: 'Failed to update task',
+    res.status(error.statusCode || 400).json({
+      message: error.message || 'Failed to update task',
     })
   }
 }

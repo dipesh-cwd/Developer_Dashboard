@@ -1,7 +1,9 @@
 import api from '../lib/api'
 
-export const getTasks = async () => {
-  const response = await api.get('/tasks')
+export const getTasks = async (projectId) => {
+  const response = await api.get('/tasks', {
+    params: projectId ? { projectId } : undefined,
+  })
   return response.data
 }
 

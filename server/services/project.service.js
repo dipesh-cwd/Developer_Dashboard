@@ -1,4 +1,5 @@
 const Project = require('../models/Project')
+const Task = require('../models/Task')
 
 const getAllProjects = async (userId) => {
   return Project.find({
@@ -28,10 +29,19 @@ const updateProject = async (id, projectData, userId) => {
 }
 
 const deleteProject = async (id, userId) => {
-  return Project.findOneAndDelete({
+  const project = await Project.findOneAndDelete({
     _id: id,
     owner: userId,
   })
+
+  if (project) {
+    await Task.updateMany(
+      { owner: userId, project: id },
+      { $unset: { project: 1 } }
+    )
+  }
+
+  return project
 }
 
 module.exports = {

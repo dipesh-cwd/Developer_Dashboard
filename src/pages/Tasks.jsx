@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import {
   useMutation,
   useQuery,
@@ -8,6 +9,7 @@ import {
 import PageHeader from '../components/ui/PageHeader'
 import TaskCard from '../components/tasks/TaskCard'
 import TaskForm from '../components/tasks/TaskForm'
+import { getProjects } from '../services/projectService'
 import {
   createTask,
   deleteTask,
@@ -17,15 +19,24 @@ import {
 
 const Tasks = () => {
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const projectId = searchParams.get('projectId') || ''
   const [editingTask, setEditingTask] = useState(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [search, setSearch] = useState('')
 
   const { data: tasks = [], isPending, isError, error } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: getTasks,
+    queryKey: ['tasks', projectId],
+    queryFn: () => getTasks(projectId),
   })
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: getProjects,
+  })
+
+  const selectedProject = projects.find((project) => project._id === projectId)
 
   const createMutation = useMutation({
     mutationFn: createTask,
@@ -100,7 +111,17 @@ const Tasks = () => {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Tasks" description="Track the work behind your projects." />
+      <PageHeader
+        title={selectedProject ? `${selectedProject.name} tasks` : 'Tasks'}
+        description={selectedProject ? 'Tasks connected to this project.' : 'Track the work behind your projects.'}
+      />
+
+      {selectedProject && (
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-sm text-slate-600">Project workspace · <span className="font-semibold text-slate-900">{selectedProject.name}</span></p>
+          <Link to="/tasks" className="text-sm font-medium text-slate-700 hover:text-slate-950">View all tasks</Link>
+        </div>
+      )}
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
@@ -119,6 +140,8 @@ const Tasks = () => {
 
       <TaskForm
         task={editingTask}
+        projects={projects}
+        defaultProjectId={projectId}
         onSubmit={handleSubmit}
         onCancel={() => setEditingTask(null)}
         isSubmitting={isSubmitting}

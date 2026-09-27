@@ -6,12 +6,14 @@ import {
 } from '@tanstack/react-query'
 
 import PageHeader from '../components/ui/PageHeader'
+import { Link } from 'react-router'
 import {
   createProject,
   deleteProject,
   getProjects,
   updateProject,
 } from '../services/projectService'
+import { getTasks } from '../services/taskService'
 
 const emptyForm = {
   name: '',
@@ -32,6 +34,11 @@ const Projects = () => {
   } = useQuery({
     queryKey: ['projects'],
     queryFn: getProjects,
+  })
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => getTasks(),
   })
 
   const createMutation = useMutation({
@@ -55,6 +62,7 @@ const Projects = () => {
     mutationFn: deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
   })
 
@@ -235,7 +243,19 @@ const Projects = () => {
                   {project.description || 'No description'}
                 </p>
 
-                <div className="mt-5 flex gap-2">
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-xs text-slate-400">
+                    {tasks.filter((task) => task.project?._id === project._id || task.project === project._id).length} tasks
+                  </p>
+                  <Link
+                    to={`/tasks?projectId=${project._id}`}
+                    className="text-sm font-medium text-slate-700 hover:text-slate-950"
+                  >
+                    Open workspace →
+                  </Link>
+                </div>
+
+                <div className="mt-4 flex gap-2">
                   <button
                     type="button"
                     onClick={() => startEditing(project)}
