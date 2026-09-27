@@ -3,6 +3,7 @@ const ProjectCard = ({
   onEdit,
   onDelete,
   isDeleting,
+  readOnly = false,
 }) => {
   const statusStyles = {
     planned: 'bg-amber-100 text-amber-700',
@@ -36,6 +37,7 @@ const ProjectCard = ({
         {new Date(project.createdAt).toLocaleDateString()}
       </p>
 
+      {!readOnly && (
       <div className="mt-4 flex gap-2">
         <button
           onClick={() => onEdit(project)}
@@ -52,6 +54,7 @@ const ProjectCard = ({
           {isDeleting ? 'Deleting...' : 'Delete'}
         </button>
       </div>
+      )}
     </div>
   )
 }

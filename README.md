@@ -1,16 +1,36 @@
-# React + Vite
+# Developer Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A full-stack developer workspace built with React, Tailwind CSS, React Query, Express, MongoDB, and JWT authentication.
 
-Currently, two official plugins are available:
+## Current modules
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Authentication with access/refresh tokens
+- Protected application routes
+- Dashboard overview
+- Projects CRUD with per-user ownership
+- Tasks CRUD with status, priority, and due dates
+- React Query server-state management
+- Responsive dashboard layout
 
-## React Compiler
+## Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Frontend:
 
-## Expanding the Oxlint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Backend:
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+Create `server/.env` from `server/.env.example` before starting the backend.
+
+## Architecture direction
+
+The app is being built feature-by-feature. Each major feature should have its own backend API, service layer, React Query integration, page, and reusable UI components.

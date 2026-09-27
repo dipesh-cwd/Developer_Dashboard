@@ -15,6 +15,7 @@ const TaskCard = ({
   onEdit,
   onDelete,
   isDeleting,
+  readOnly = false,
 }) => {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -48,6 +49,7 @@ const TaskCard = ({
         )}
       </div>
 
+      {!readOnly && (
       <div className="mt-5 flex gap-2">
         <button
           type="button"
@@ -66,6 +68,7 @@ const TaskCard = ({
           {isDeleting ? 'Deleting...' : 'Delete'}
         </button>
       </div>
+      )}
     </article>
   )
 }
