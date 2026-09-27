@@ -91,11 +91,42 @@ const me = async (req, res) => {
   }
 }
 
+const updateProfile = async (req, res) => {
+  try {
+    const user = await authService.updateProfile(req.user.id, req.body)
+
+    res.json({ user })
+  } catch (error) {
+    console.error(error)
+
+    res.status(error.statusCode || 400).json({
+      message: error.message || 'Failed to update profile',
+    })
+  }
+}
+
+const changePassword = async (req, res) => {
+  try {
+    await authService.changePassword(req.user.id, req.body)
+
+    res.json({
+      message: 'Password changed successfully',
+    })
+  } catch (error) {
+    console.error(error)
+
+    res.status(error.statusCode || 400).json({
+      message: error.message || 'Failed to change password',
+    })
+  }
+}
 
 module.exports = {
   register,
   login,
   refresh,
   me,
+  updateProfile,
+  changePassword,
 }
 
