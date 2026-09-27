@@ -6,6 +6,7 @@ import PageHeader from '../components/ui/PageHeader'
 import StatCard from '../components/ui/StatCard'
 import ProjectCard from '../components/projects/ProjectCard'
 import TaskCard from '../components/tasks/TaskCard'
+import ActivityFeed from '../components/activity/ActivityFeed'
 import { getProjects } from '../services/projectService'
 import { getTasks } from '../services/taskService'
 
@@ -68,6 +69,49 @@ const Dashboard = () => {
   const recentTasks = [...tasks]
     .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
     .slice(0, 4)
+
+  const activity = useMemo(() => {
+    const projectActivities = projects.flatMap((project) => {
+      const created = {
+        id: `project-created-${project._id}`,
+        type: 'project',
+        label: 'Project',
+        title: `Created ${project.name}`,
+        description: project.description || 'New project added to your workspace.',
+        date: project.createdAt,
+        projectId: project._id,
+      }
+
+      const updatedAt = project.updatedAt && project.updatedAt !== project.createdAt
+      const updated = updatedAt
+        ? [{
+            id: `project-updated-${project._id}`,
+            type: 'project',
+            label: 'Project',
+            title: `Updated ${project.name}`,
+            description: `Project status: ${project.status}.`,
+            date: project.updatedAt,
+            projectId: project._id,
+          }]
+        : []
+
+      return [created, ...updated]
+    })
+
+    const taskActivities = tasks.map((task) => ({
+      id: `task-${task._id}`,
+      type: 'task',
+      label: 'Task',
+      title: task.title,
+      description: `${task.status}${task.project?.name ? ` · ${task.project.name}` : ''}`,
+      date: task.updatedAt || task.createdAt,
+      projectId: task.project?._id || task.project,
+    }))
+
+    return [...projectActivities, ...taskActivities]
+      .filter((item) => item.date)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+  }, [projects, tasks])
 
   const isLoading = projectsQuery.isPending || tasksQuery.isPending
   const isError = projectsQuery.isError || tasksQuery.isError
@@ -141,7 +185,7 @@ const Dashboard = () => {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="ui-card p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -195,7 +239,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="ui-card p-6">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
               Workload breakdown
@@ -253,27 +297,36 @@ const Dashboard = () => {
         )}
       </section>
 
-      <section>
-        <div className="mb-5">
-          <h2 className="text-lg font-bold text-slate-900">
-            Recent activity
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Recently created or updated tasks in your workspace.
-          </p>
+      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="ui-card p-6">
+          <div className="mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Activity feed</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              A timeline of changes across your workspace.
+            </p>
+          </div>
+          <ActivityFeed activities={activity} emptyMessage="No workspace activity yet." />
         </div>
 
-        {recentTasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            No task activity yet.
+        <div className="ui-card p-6">
+          <div className="mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Recent tasks</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Your latest task changes.
+            </p>
           </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {recentTasks.map((task) => (
-              <TaskCard key={task._id} task={task} readOnly />
-            ))}
-          </div>
-        )}
+          {recentTasks.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+              No task activity yet.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentTasks.map((task) => (
+                <TaskCard key={task._id} task={task} readOnly />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   )

@@ -1,67 +1,32 @@
 import { Link } from 'react-router'
 
-const ProjectCard = ({
-  project,
-  onEdit,
-  onDelete,
-  isDeleting,
-  readOnly = false,
-}) => {
+const ProjectCard = ({ project, onEdit, onDelete, isDeleting, readOnly = false }) => {
   const statusStyles = {
-    planned: 'bg-amber-100 text-amber-700',
-    active: 'bg-emerald-100 text-emerald-700',
-    completed: 'bg-blue-100 text-blue-700',
+    planned: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200',
+    active: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
+    completed: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
   }
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <article className="ui-card ui-card-hover overflow-hidden p-5">
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-lg font-semibold">{project.name}</h3>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            statusStyles[project.status] || 'bg-slate-100 text-slate-700'
-          }`}
-        >
-          {project.status}
-        </span>
+        <div className="min-w-0">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[.15em] text-slate-400">Project</p>
+          <h3 className="truncate text-lg font-bold tracking-tight text-slate-950">{project.name}</h3>
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${statusStyles[project.status] || 'bg-slate-100 text-slate-600'}`}>{project.status}</span>
       </div>
-
-      <p className="mt-3 text-sm text-slate-500">
-        {project.description || 'No description'}
-      </p>
-
-      <p className="mt-5 text-xs text-slate-400">
-        Created: {new Date(project.createdAt).toLocaleDateString()}
-      </p>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          to={`/projects/${project._id}`}
-          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
-          Open
-        </Link>
-
-        {!readOnly && (
-          <>
-            <button
-              onClick={() => onEdit(project)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
-            >
-              Edit
-            </button>
-
-            <button
-              onClick={() => onDelete(project._id)}
-              disabled={isDeleting}
-              className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-            >
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </button>
-          </>
-        )}
+      <p className="mt-3 min-h-10 text-sm leading-5 text-slate-500">{project.description || 'No description added yet.'}</p>
+      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+        <p className="text-xs font-medium text-slate-400">Created {new Date(project.createdAt).toLocaleDateString()}</p>
+        <Link to={`/projects/${project._id}`} className="text-xs font-bold text-slate-800 hover:text-slate-950 hover:underline">Open →</Link>
       </div>
-    </div>
+      {!readOnly && <div className="mt-3 flex gap-2">
+        <Link to={`/projects/${project._id}`} className="ui-button-primary flex-1">Open</Link>
+        <button type="button" onClick={() => onEdit(project)} className="ui-button-secondary">Edit</button>
+        <button type="button" onClick={() => onDelete(project._id)} disabled={isDeleting} className="ui-button-secondary !text-red-600">{isDeleting ? 'Deleting...' : 'Delete'}</button>
+      </div>}
+    </article>
   )
 }
 

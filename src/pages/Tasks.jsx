@@ -131,7 +131,7 @@ const Tasks = () => {
           ['Done', stats.done],
           ['Overdue', stats.overdue],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div key={label} className="ui-card p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
             <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
           </div>
@@ -163,15 +163,15 @@ const Tasks = () => {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search tasks..."
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-500"
+              className="ui-input"
             />
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="ui-select">
               <option value="all">All statuses</option>
               <option value="todo">Todo</option>
               <option value="in-progress">In progress</option>
               <option value="done">Done</option>
             </select>
-            <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+            <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value)} className="ui-select">
               <option value="all">All priorities</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>

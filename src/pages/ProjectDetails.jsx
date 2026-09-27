@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import PageHeader from '../components/ui/PageHeader'
 import { getProject, getGithubRepository } from '../services/projectService'
 import { getTasks } from '../services/taskService'
+import ActivityFeed from '../components/activity/ActivityFeed'
 
 const ProjectDetails = () => {
   const { id } = useParams()
@@ -37,6 +38,52 @@ const ProjectDetails = () => {
   const inProgress = projectTasks.filter((task) => task.status === 'in-progress').length
   const progress = projectTasks.length ? Math.round((completed / projectTasks.length) * 100) : 0
 
+  const activity = useMemo(() => {
+    const taskActivities = projectTasks.map((task) => ({
+      id: `task-${task._id}`,
+      type: 'task',
+      label: 'Task',
+      title: task.title,
+      description: `Task status: ${task.status}.`,
+      date: task.updatedAt || task.createdAt,
+    }))
+
+    const github = githubQuery.data
+    const commitActivities = (github?.recentCommits || []).map((commit) => ({
+      id: `commit-${commit.sha}`,
+      type: 'commit',
+      label: 'Commit',
+      title: commit.message,
+      description: `By ${commit.author}`,
+      date: commit.date,
+      href: commit.url,
+    }))
+
+    const issueActivities = (github?.recentIssues || []).map((issue) => ({
+      id: `issue-${issue.number}`,
+      type: 'issue',
+      label: 'Issue',
+      title: `#${issue.number} ${issue.title}`,
+      description: `${issue.comments} comment${issue.comments === 1 ? '' : 's'}`,
+      date: issue.updatedAt || issue.createdAt,
+      href: issue.url,
+    }))
+
+    const pullRequestActivities = (github?.recentPullRequests || []).map((pullRequest) => ({
+      id: `pull-${pullRequest.number}`,
+      type: 'pullRequest',
+      label: 'PR',
+      title: `#${pullRequest.number} ${pullRequest.title}`,
+      description: `By ${pullRequest.author}${pullRequest.draft ? ' · draft' : ''}`,
+      date: pullRequest.updatedAt || pullRequest.createdAt,
+      href: pullRequest.url,
+    }))
+
+    return [...taskActivities, ...commitActivities, ...issueActivities, ...pullRequestActivities]
+      .filter((item) => item.date)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+  }, [projectTasks, githubQuery.data])
+
   if (projectQuery.isPending) {
     return <p className="text-slate-500">Loading project...</p>
   }
@@ -65,14 +112,14 @@ const ProjectDetails = () => {
       />
 
       <div className="flex flex-wrap gap-3">
-        <Link to="/projects" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50">
+        <Link to="/projects" className="ui-button-secondary">
           ← Projects
         </Link>
-        <Link to={`/tasks?projectId=${project._id}`} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
+        <Link to={`/tasks?projectId=${project._id}`} className="ui-button-primary">
           Manage tasks
         </Link>
         {project.githubUrl && githubQuery.data?.htmlUrl && (
-          <a href={githubQuery.data.htmlUrl} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50">
+          <a href={githubQuery.data.htmlUrl} target="_blank" rel="noreferrer" className="ui-button-secondary">
             Open GitHub ↗
           </a>
         )}
@@ -86,7 +133,7 @@ const ProjectDetails = () => {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+        <div className="ui-card p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold">Task progress</h2>
@@ -116,7 +163,7 @@ const ProjectDetails = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="ui-card p-6">
           <h2 className="text-lg font-bold">GitHub</h2>
           {!project.githubUrl ? (
             <p className="mt-3 text-sm text-slate-500">No repository connected.</p>
@@ -156,67 +203,93 @@ const ProjectDetails = () => {
         </div>
       </section>
 
-      {project.githubUrl && githubQuery.data && (
-        <section className="grid gap-6 lg:grid-cols-2">
-          <GithubList
-            title="Open issues"
-            emptyMessage="No open issues."
-            items={githubQuery.data.recentIssues || []}
-            renderItem={(issue) => (
-              <a
-                href={issue.url}
-                target="_blank"
-                rel="noreferrer"
-                className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-medium text-slate-900">
-                    #{issue.number} {issue.title}
-                  </p>
-                  <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                    {issue.state}
-                  </span>
-                </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  {issue.comments} comment{issue.comments === 1 ? '' : 's'}
+        {project.githubUrl && githubQuery.data && (
+          <>
+            <section className="ui-card p-6">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold">Project activity</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Tasks and GitHub changes in one timeline.
                 </p>
-              </a>
-            )}
-          />
+              </div>
 
-          <GithubList
-            title="Open pull requests"
-            emptyMessage="No open pull requests."
-            items={githubQuery.data.recentPullRequests || []}
-            renderItem={(pullRequest) => (
-              <a
-                href={pullRequest.url}
-                target="_blank"
-                rel="noreferrer"
-                className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-medium text-slate-900">
-                    #{pullRequest.number} {pullRequest.title}
-                  </p>
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${pullRequest.draft ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                    {pullRequest.draft ? 'draft' : 'open'}
-                  </span>
-                </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  By {pullRequest.author}
-                </p>
-              </a>
-            )}
-          />
-        </section>
-      )}
+              <ActivityFeed
+                activities={activity}
+                emptyMessage="No activity for this project yet."
+                limit={10}
+              />
+            </section>
+
+            <section className="grid gap-6 lg:grid-cols-2">
+              <GithubList
+                title="Open issues"
+                emptyMessage="No open issues."
+                items={githubQuery.data.recentIssues || []}
+                renderItem={(issue) => (
+                  <a
+                    href={issue.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-medium text-slate-900">
+                        #{issue.number} {issue.title}
+                      </p>
+                      <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                        {issue.state}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-xs text-slate-500">
+                      {issue.comments} comment{issue.comments === 1 ? '' : 's'}
+                    </p>
+                  </a>
+                )}
+              />
+
+              <GithubList
+                title="Open pull requests"
+                emptyMessage="No open pull requests."
+                items={githubQuery.data.recentPullRequests || []}
+                renderItem={(pullRequest) => (
+                  <a
+                    href={pullRequest.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border border-slate-200 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-medium text-slate-900">
+                        #{pullRequest.number} {pullRequest.title}
+                      </p>
+
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                          pullRequest.draft
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
+                        {pullRequest.draft ? 'draft' : 'open'}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-xs text-slate-500">
+                      By {pullRequest.author}
+                    </p>
+                  </a>
+                )}
+              />
+            </section>
+          </>
+        )}
     </div>
   )
 }
 
 const GithubList = ({ title, emptyMessage, items, renderItem }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div className="ui-card p-6">
     <div className="flex items-center justify-between gap-4">
       <div>
         <h2 className="text-lg font-bold">{title}</h2>

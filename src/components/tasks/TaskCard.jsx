@@ -20,7 +20,7 @@ const TaskCard = ({
   readOnly = false,
 }) => {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="ui-card ui-card-hover p-5">
       <div className="flex items-start justify-between gap-4">
         <h2 className="font-semibold text-slate-900">
           {task.title}
@@ -65,7 +65,7 @@ const TaskCard = ({
             type="button"
             onClick={() => onStatusChange(task._id, task.status === 'todo' ? 'in-progress' : task.status === 'in-progress' ? 'done' : 'todo')}
             disabled={isUpdating}
-            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="ui-button-primary"
           >
             {isUpdating ? 'Updating...' : task.status === 'todo' ? 'Start' : task.status === 'in-progress' ? 'Complete' : 'Reopen'}
           </button>
@@ -74,7 +74,7 @@ const TaskCard = ({
         <button
           type="button"
           onClick={() => onEdit(task)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+          className="ui-button-secondary"
         >
           Edit
         </button>
@@ -83,7 +83,7 @@ const TaskCard = ({
           type="button"
           onClick={() => onDelete(task._id)}
           disabled={isDeleting}
-          className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+          className="ui-button-secondary !text-red-600"
         >
           {isDeleting ? 'Deleting...' : 'Delete'}
         </button>

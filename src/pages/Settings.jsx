@@ -72,7 +72,7 @@ const Settings = () => {
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="ui-card p-6 sm:p-7">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
             <p className="mt-1 text-sm text-slate-500">Update the information shown across your dashboard.</p>
@@ -88,7 +88,7 @@ const Settings = () => {
                 required
                 minLength={2}
                 maxLength={50}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-500"
+                className="ui-input"
               />
             </div>
 
@@ -100,7 +100,7 @@ const Settings = () => {
                 value={profile.email}
                 onChange={(event) => setProfile({ ...profile, email: event.target.value })}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-500"
+                className="ui-input"
               />
             </div>
 
@@ -110,14 +110,14 @@ const Settings = () => {
             <button
               type="submit"
               disabled={profileState.loading}
-              className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="ui-button-primary"
             >
               {profileState.loading ? 'Saving...' : 'Save profile'}
             </button>
           </form>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="ui-card p-6 sm:p-7">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Security</h2>
             <p className="mt-1 text-sm text-slate-500">Change your password without leaving the dashboard.</p>
@@ -132,7 +132,7 @@ const Settings = () => {
                 value={passwords.currentPassword}
                 onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-500"
+                className="ui-input"
               />
             </div>
 
@@ -145,7 +145,7 @@ const Settings = () => {
                 onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-500"
+                className="ui-input"
               />
             </div>
 
@@ -158,7 +158,7 @@ const Settings = () => {
                 onChange={(event) => setPasswords({ ...passwords, confirmPassword: event.target.value })}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-500"
+                className="ui-input"
               />
             </div>
 
@@ -168,7 +168,7 @@ const Settings = () => {
             <button
               type="submit"
               disabled={passwordState.loading}
-              className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="ui-button-primary"
             >
               {passwordState.loading ? 'Changing...' : 'Change password'}
             </button>

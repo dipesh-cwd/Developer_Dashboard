@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query'
 
 import PageHeader from '../components/ui/PageHeader'
+import ProjectCard from '../components/projects/ProjectCard'
 import { Link } from 'react-router'
 import {
   createProject,
@@ -238,7 +239,7 @@ const Projects = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="ui-card p-6 sm:p-7"
       >
         <div className="mb-5">
           <h2 className="text-lg font-semibold">
@@ -259,7 +260,7 @@ const Projects = () => {
             }
             placeholder="Project name"
             required
-            className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500"
+            className="ui-input"
           />
 
           <select
@@ -267,7 +268,7 @@ const Projects = () => {
             onChange={(event) =>
               setForm({ ...form, status: event.target.value })
             }
-            className="rounded-lg border border-slate-300 px-3 py-2"
+            className="ui-select"
           >
             <option value="planned">Planned</option>
             <option value="active">Active</option>
@@ -281,7 +282,7 @@ const Projects = () => {
             }
             placeholder="GitHub repository URL (optional)"
             type="url"
-            className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500 md:col-span-2"
+            className="ui-input md:col-span-2"
           />
 
           <textarea
@@ -294,7 +295,7 @@ const Projects = () => {
             }
             placeholder="Project description"
             rows="3"
-            className="resize-none rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-slate-500 md:col-span-2"
+            className="ui-textarea md:col-span-2"
           />
         </div>
 
@@ -302,7 +303,7 @@ const Projects = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+            className="ui-button-primary"
           >
             {isSaving
               ? 'Saving...'
@@ -316,7 +317,7 @@ const Projects = () => {
               type="button"
               onClick={cancelEditing}
               disabled={isSaving}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+              className="ui-button-secondary"
             >
               Cancel
             </button>
@@ -345,68 +346,15 @@ const Projects = () => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
-              <article
+              <ProjectCard
                 key={project._id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-semibold">
-                    {project.name}
-                  </h3>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs">
-                    {project.status}
-                  </span>
-                </div>
-
-                <p className="mt-3 text-sm text-slate-500">
-                  {project.description || 'No description'}
-                </p>
-
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <p className="text-xs text-slate-400">
-                    {tasks.filter((task) => task.project?._id === project._id || task.project === project._id).length} tasks
-                  </p>
-                  <Link
-                    to={`/projects/${project._id}`}
-                    className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
-                  >
-                    Open
-                  </Link>
-                </div>
-
-                <Link
-                  to={`/tasks?projectId=${project._id}`}
-                  className="mt-3 inline-block text-sm font-medium text-slate-600 hover:text-slate-950 hover:underline"
-                >
-                  View project tasks →
-                </Link>
-
-                <GithubRepositoryPreview project={project} />
-
-                <div className="mt-4 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => startEditing(project)}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => deleteMutation.mutate(project._id)}
-                    disabled={deleteMutation.isPending}
-                    className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {deleteMutation.isPending &&
-                    deleteMutation.variables === project._id
-                      ? 'Deleting...'
-                      : 'Delete'}
-                  </button>
-                </div>
-              </article>
+                project={project}
+                onEdit={startEditing}
+                onDelete={deleteMutation.mutate}
+                isDeleting={deleteMutation.isPending && deleteMutation.variables === project._id}
+              />
             ))}
           </div>
         )}
