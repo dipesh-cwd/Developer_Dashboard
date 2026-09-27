@@ -1,15 +1,19 @@
 import {
   BrowserRouter,
-  Routes,
-  Route,
   Navigate,
+  Route,
+  Routes,
 } from 'react-router'
 
-import Login from './pages/Login'
-import Register from './pages/Register'
+import DashboardLayout from './layouts/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
-
 import Dashboard from './pages/Dashboard'
+import Login from './pages/Login'
+import Projects from './pages/Projects'
+import Register from './pages/Register'
+import Settings from './pages/Settings'
+import Tasks from './pages/Tasks'
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -19,21 +23,16 @@ const App = () => {
           element={<Navigate to="/dashboard" replace />}
         />
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
