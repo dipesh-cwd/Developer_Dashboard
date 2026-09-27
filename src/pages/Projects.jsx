@@ -364,17 +364,24 @@ const Projects = () => {
                   {project.description || 'No description'}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-4 flex items-center justify-between gap-3">
                   <p className="text-xs text-slate-400">
                     {tasks.filter((task) => task.project?._id === project._id || task.project === project._id).length} tasks
                   </p>
                   <Link
-                    to={`/tasks?projectId=${project._id}`}
-                    className="text-sm font-medium text-slate-700 hover:text-slate-950"
+                    to={`/projects/${project._id}`}
+                    className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
                   >
-                    Open workspace →
+                    Open
                   </Link>
                 </div>
+
+                <Link
+                  to={`/tasks?projectId=${project._id}`}
+                  className="mt-3 inline-block text-sm font-medium text-slate-600 hover:text-slate-950 hover:underline"
+                >
+                  View project tasks →
+                </Link>
 
                 <GithubRepositoryPreview project={project} />
 

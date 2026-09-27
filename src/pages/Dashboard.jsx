@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 
 import PageHeader from '../components/ui/PageHeader'
@@ -35,12 +37,36 @@ const Dashboard = () => {
   )
   const doneTasks = tasks.filter((task) => task.status === 'done')
 
+  const overdueTasks = useMemo(() => {
+    const now = new Date()
+    return tasks.filter((task) => {
+      if (!task.dueDate || task.status === 'done') return false
+      return new Date(task.dueDate) < now
+    })
+  }, [tasks])
+
+  const completionRate = tasks.length
+    ? Math.round((doneTasks.length / tasks.length) * 100)
+    : 0
+
+  const projectProgress = projects.map((project) => {
+    const projectTasks = tasks.filter(
+      (task) => task.project?._id === project._id || task.project === project._id,
+    )
+    const completed = projectTasks.filter((task) => task.status === 'done').length
+    const progress = projectTasks.length
+      ? Math.round((completed / projectTasks.length) * 100)
+      : 0
+
+    return { ...project, taskCount: projectTasks.length, progress }
+  })
+
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 3)
 
   const recentTasks = [...tasks]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
     .slice(0, 4)
 
   const isLoading = projectsQuery.isPending || tasksQuery.isPending
@@ -88,7 +114,7 @@ const Dashboard = () => {
     <div className="space-y-8">
       <PageHeader
         title="Dashboard"
-        description="A quick overview of your development workspace."
+        description="Understand your projects, workload, and progress at a glance."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -98,9 +124,9 @@ const Dashboard = () => {
           description={`${activeProjects.length} active`}
         />
         <StatCard
-          title="Completed projects"
-          value={completedProjects.length}
-          description="Projects finished"
+          title="Task completion"
+          value={`${completionRate}%`}
+          description={`${doneTasks.length} of ${tasks.length} done`}
         />
         <StatCard
           title="Open tasks"
@@ -108,9 +134,9 @@ const Dashboard = () => {
           description={`${inProgressTasks.length} in progress`}
         />
         <StatCard
-          title="Completed tasks"
-          value={doneTasks.length}
-          description={`of ${tasks.length} total`}
+          title="Overdue"
+          value={overdueTasks.length}
+          description={overdueTasks.length ? 'Needs attention' : 'Nothing overdue'}
         />
       </section>
 
@@ -119,97 +145,132 @@ const Dashboard = () => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Recent projects
+                Project progress
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Your latest projects at a glance.
+                See which projects are moving forward and which need attention.
               </p>
             </div>
-            <a
-              href="/projects"
+            <Link
+              to="/projects"
               className="text-sm font-medium text-slate-700 hover:text-slate-950"
             >
               View all
-            </a>
+            </Link>
           </div>
 
-          {recentProjects.length === 0 ? (
+          {projectProgress.length === 0 ? (
             <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
               No projects yet. Create your first project from Projects.
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {recentProjects.map((project) => (
-                <ProjectCard
-                  key={project._id}
-                  project={project}
-                  readOnly
-                />
+            <div className="mt-6 space-y-5">
+              {projectProgress.slice(0, 5).map((project) => (
+                <div key={project._id}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <Link
+                        to={`/projects/${project._id}`}
+                        className="truncate text-sm font-semibold text-slate-900 hover:underline"
+                      >
+                        {project.name}
+                      </Link>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {project.taskCount} {project.taskCount === 1 ? 'task' : 'tasks'} · {project.status}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold text-slate-700">
+                      {project.progress}%
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-slate-900 transition-all"
+                      style={{ width: `${project.progress}%` }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Task progress
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Current workload across your tasks.
-              </p>
-            </div>
-            <a
-              href="/tasks"
-              className="text-sm font-medium text-slate-700 hover:text-slate-950"
-            >
-              View all
-            </a>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Workload breakdown
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Your current task distribution.
+            </p>
           </div>
 
           <div className="mt-6 space-y-5">
-            <ProgressRow
-              label="Todo"
-              value={todoTasks.length}
-              total={tasks.length}
-            />
-            <ProgressRow
-              label="In progress"
-              value={inProgressTasks.length}
-              total={tasks.length}
-            />
-            <ProgressRow
-              label="Done"
-              value={doneTasks.length}
-              total={tasks.length}
-            />
+            <ProgressRow label="Todo" value={todoTasks.length} total={tasks.length} />
+            <ProgressRow label="In progress" value={inProgressTasks.length} total={tasks.length} />
+            <ProgressRow label="Done" value={doneTasks.length} total={tasks.length} />
+          </div>
+
+          <div className="mt-6 rounded-xl bg-slate-50 p-4">
+            <p className="text-sm font-semibold text-slate-800">
+              {completedProjects.length} completed {completedProjects.length === 1 ? 'project' : 'projects'}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Keep your active work small enough to finish consistently.
+            </p>
           </div>
         </div>
       </section>
 
       <section>
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Recent projects
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Your latest projects at a glance.
+            </p>
+          </div>
+          <Link
+            to="/projects"
+            className="text-sm font-medium text-slate-700 hover:text-slate-950"
+          >
+            View all
+          </Link>
+        </div>
+
+        {recentProjects.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+            No projects yet. Create your first project from Projects.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {recentProjects.map((project) => (
+              <ProjectCard key={project._id} project={project} readOnly />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
         <div className="mb-5">
           <h2 className="text-lg font-bold text-slate-900">
-            Recent tasks
+            Recent activity
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            The latest work added to your workspace.
+            Recently created or updated tasks in your workspace.
           </p>
         </div>
 
         {recentTasks.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            No tasks yet. Create your first task from Tasks.
+            No task activity yet.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {recentTasks.map((task) => (
-              <TaskCard
-                key={task._id}
-                task={task}
-                readOnly
-              />
+              <TaskCard key={task._id} task={task} readOnly />
             ))}
           </div>
         )}
