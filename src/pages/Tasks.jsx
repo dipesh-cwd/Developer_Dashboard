@@ -8,6 +8,7 @@ import {
 
 import PageHeader from '../components/ui/PageHeader'
 import TaskCard from '../components/tasks/TaskCard'
+import TaskBoard from '../components/tasks/TaskBoard'
 import TaskForm from '../components/tasks/TaskForm'
 import { getProjects } from '../services/projectService'
 import {
@@ -25,6 +26,7 @@ const Tasks = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [view, setView] = useState('board')
 
   const { data: tasks = [], isPending, isError, error } = useQuery({
     queryKey: ['tasks', projectId],
@@ -178,6 +180,26 @@ const Tasks = () => {
               <option value="low">Low</option>
             </select>
           </div>
+
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <p className="text-xs text-slate-400">Drag tasks between columns to update their status.</p>
+            <div className="flex rounded-lg border border-slate-200 bg-white p-1">
+              <button
+                type="button"
+                onClick={() => setView('board')}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === 'board' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+              >
+                Board
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === 'list' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+              >
+                List
+              </button>
+            </div>
+          </div>
         </div>
 
         {filteredTasks.length === 0 ? (
@@ -185,6 +207,14 @@ const Tasks = () => {
             <p className="font-medium text-slate-700">{tasks.length === 0 ? 'No tasks yet.' : 'No tasks match your filters.'}</p>
             <p className="mt-1 text-sm text-slate-500">Create a task or adjust your filters.</p>
           </div>
+        ) : view === 'board' ? (
+          <TaskBoard
+            tasks={filteredTasks}
+            onEdit={setEditingTask}
+            onDelete={deleteMutation.mutate}
+            onStatusChange={handleStatusChange}
+            isUpdating={(id) => updateMutation.isPending && updateMutation.variables?.id === id}
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {filteredTasks.map((task) => (

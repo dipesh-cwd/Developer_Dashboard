@@ -46,6 +46,33 @@ const Dashboard = () => {
     })
   }, [tasks])
 
+  const upcomingTasks = useMemo(() => {
+    const now = new Date()
+    const nextWeek = new Date(now)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+
+    return tasks
+      .filter((task) => {
+        if (!task.dueDate || task.status === 'done') return false
+        const dueDate = new Date(task.dueDate)
+        return dueDate >= now && dueDate <= nextWeek
+      })
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+  }, [tasks])
+
+  const focusTasks = useMemo(() => {
+    const overdue = overdueTasks
+      .map((task) => ({ ...task, focusType: 'overdue' }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+
+    const upcoming = upcomingTasks.map((task) => ({
+      ...task,
+      focusType: 'upcoming',
+    }))
+
+    return [...overdue, ...upcoming].slice(0, 6)
+  }, [overdueTasks, upcomingTasks])
+
   const completionRate = tasks.length
     ? Math.round((doneTasks.length / tasks.length) * 100)
     : 0
@@ -266,6 +293,87 @@ const Dashboard = () => {
         </div>
       </section>
 
+      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="ui-card p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Focus queue</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Work that deserves attention now or within the next 7 days.
+              </p>
+            </div>
+            <Link
+              to="/tasks"
+              className="shrink-0 text-sm font-medium text-slate-700 hover:text-slate-950"
+            >
+              View tasks
+            </Link>
+          </div>
+
+          {focusTasks.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+              <p className="text-sm font-medium text-slate-700">You are clear for now.</p>
+              <p className="mt-1 text-xs text-slate-500">No overdue or upcoming tasks in the next 7 days.</p>
+            </div>
+          ) : (
+            <div className="mt-5 divide-y divide-slate-100">
+              {focusTasks.map((task) => {
+                const projectId = task.project?._id || task.project
+                const isOverdue = task.focusType === 'overdue'
+
+                return (
+                  <div key={`${task.focusType}-${task._id}`} className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">{task.title}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                        <span className={isOverdue ? 'font-semibold text-red-600' : 'text-slate-500'}>
+                          {isOverdue ? 'Overdue' : 'Due'} · {new Date(task.dueDate).toLocaleDateString()}
+                        </span>
+                        {task.project?.name && projectId && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <Link to={`/projects/${projectId}`} className="text-slate-500 hover:text-slate-900 hover:underline">
+                              {task.project.name}
+                            </Link>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold capitalize text-slate-600">
+                      {task.priority}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="ui-card p-6">
+          <h2 className="text-lg font-bold text-slate-900">Planning signal</h2>
+          <p className="mt-1 text-sm text-slate-500">A quick read on what your workspace needs next.</p>
+
+          <div className="mt-5 space-y-3">
+            <PlanningSignal
+              label="Overdue"
+              value={overdueTasks.length}
+              message={overdueTasks.length ? 'Resolve these first.' : 'Nothing is late.'}
+              urgent={overdueTasks.length > 0}
+            />
+            <PlanningSignal
+              label="Next 7 days"
+              value={upcomingTasks.length}
+              message={upcomingTasks.length ? 'Plan these before they become urgent.' : 'No deadlines coming up.'}
+            />
+            <PlanningSignal
+              label="In progress"
+              value={inProgressTasks.length}
+              message={inProgressTasks.length ? 'Finish existing work before starting more.' : 'Nothing currently in progress.'}
+            />
+          </div>
+        </div>
+      </section>
+
       <section>
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
@@ -331,6 +439,16 @@ const Dashboard = () => {
     </div>
   )
 }
+
+const PlanningSignal = ({ label, value, message, urgent = false }) => (
+  <div className="rounded-xl border border-slate-200 p-4">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className={`text-xl font-bold ${urgent ? 'text-red-600' : 'text-slate-950'}`}>{value}</span>
+    </div>
+    <p className="mt-1 text-xs text-slate-500">{message}</p>
+  </div>
+)
 
 const ProgressRow = ({ label, value, total }) => {
   const percentage = total === 0 ? 0 : Math.round((value / total) * 100)
